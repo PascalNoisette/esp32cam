@@ -8,6 +8,22 @@ logger:
 
 # Enable Home Assistant API
 api:
+  services:
+    - service: control_servo_pan
+      variables:
+        level: float
+      then:
+        - servo.write:
+            id: servo_pan
+            level: !lambda 'return level / 100.0;'
+    - service: control_servo_tilt
+      variables:
+        level: float
+      then:
+        - servo.write:
+            id: servo_tilt
+            level: !lambda 'return level / 100.0;'
+
 
 ota:
 
@@ -23,6 +39,15 @@ wifi:
 captive_portal:
 
 
+servo:
+  - id: servo_pan
+    output: servo_pan_output
+    transition_length: 4s
+    auto_detach_time: 2s
+  - id: servo_tilt
+    output: servo_tilt_output
+    transition_length: 4s
+    auto_detach_time: 2s
 
 # ESP32-CAM
 esp32_camera:
@@ -39,12 +64,23 @@ esp32_camera:
   power_down_pin: GPIO32
   resolution: XGA
   name: mycamera
+  vertical_flip: false
+  horizontal_mirror: false
 
-# Flashlight
 output:
   - platform: gpio
     pin: GPIO4
     id: gpio_4
+  - platform: ledc
+    id: servo_pan_output
+    pin: GPIO12
+    frequency: 50 Hz
+    channel: 2
+  - platform: ledc
+    id: servo_tilt_output
+    pin: GPIO13
+    frequency: 50 Hz
+    channel: 3
 
 ## GPIO_4 is the flash light pin
 light:
